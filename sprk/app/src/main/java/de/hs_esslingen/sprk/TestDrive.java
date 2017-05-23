@@ -62,7 +62,7 @@ public class TestDrive implements ResponseListener {
         mRobot.addResponseListener(this);
         mRobot.enableCollisions(true);
         mRobot.setLed(0.1f,0.1f,0.1f);
-        mRobot.sendCommand(new RollCommand(0, 1F, RollCommand.State.GO ));
+        mRobot.sendCommand(new RollCommand(0, 0.5F, RollCommand.State.GO ));
     }
     @Override
     public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
@@ -119,8 +119,11 @@ public class TestDrive implements ResponseListener {
             Log.i("TestDrive","x: " +tmp.x + " Y: " + tmp.y + "update: " + tmp.updated);
         Log.i("TestDrive","bc x: " +bc.x + " bc Y: " + bc.y + "bc update: " + bc.updated);
         Log.i("TestDrive","ac x: " +ac.x + " ac Y: " + ac.y + "ac update: " + ac.updated);
-        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.5f,RollCommand.State.GO));
-        //mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.1f,RollCommand.State.GO));
+        Log.i("TestDrive","Heading:" + mRobot.getLastHeading());
+        mRobot.setLed(0.1f,0f,0.1f);
+        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.3f,RollCommand.State.GO));
+        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.3f,RollCommand.State.STOP));
+        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.1f,RollCommand.State.GO));
         this.handeledCollision = false;
     }
 }
