@@ -90,9 +90,6 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
             case R.id.button:
                 testDrive = new TestDrive(mRobot);
                 break;
-            case R.id.test:
-
-                break;
         }
         testDrive = new TestDrive(mRobot);
     }
