@@ -48,10 +48,9 @@ public class TestDrive implements ResponseListener {
         if(mRobot != null) {
             Log.i("TestDrive", "TestDrive begins");
             this.mRobot = mRobot;
-            long sensorFlag = SensorFlag.ACCELEROMETER_NORMALIZED.longValue() | SensorFlag.ATTITUDE.longValue();
+            long sensorFlag = SensorFlag.ACCELEROMETER_NORMALIZED.longValue() | SensorFlag.GYRO_NORMALIZED.longValue();
             mRobot.enableSensors(sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10);
             mRobot.enableLocator(true);
-            mRobot.enableStabilization(true);
             mRobot.enableCollisions(true);
             mRobot.addResponseListener(this);
             int[] color = {204, 255, 51};
@@ -63,7 +62,7 @@ public class TestDrive implements ResponseListener {
     public void startTestDrive(){
         if(mRobot != null) {
             mRobot.setLed(0.1f, 0.1f, 0.1f);
-            mRobot.drive(0,0.5f);
+            mRobot.drive(0f,0.3f);
         }
     }
 
@@ -89,8 +88,8 @@ public class TestDrive implements ResponseListener {
             DeviceSensorsData dsd = sensorDataArray.get(sensorDataArray.size() - 1);
             try {
                 LocatorData locatorData = dsd.getLocatorData();
-                //if (lastpositions.size() == 10 )
-                   // this.lastpositions.remove(0);
+                if (lastpositions.size() == 50 )
+                   this.lastpositions.remove(0);
                 this.lastpositions.add(new Coordinates(locatorData.getPositionX(),locatorData.getPositionY()));
                 Log.i("Locator","Fetched Coordinates:" + lastpositions.size() +"x: " +locatorData.getPositionX() + "\t Y: " + locatorData.getPositionY());
             }catch (Exception ex){Log.i("TestDrive", "no location data");}
@@ -113,7 +112,6 @@ public class TestDrive implements ResponseListener {
             if(this.mRobot.getRobot() == robot){
                 if(!handeledCollision) {                    Coordinates ac = lastpositions.get(lastpositions.size() - 1);
                     Coordinates bc = lastpositions.get(lastpositions.size() - 3);
-                    GyroData lastgd = lastgyrodata.get(lastgyrodata.size()-1);
                     mRobot.setLed(1f,0.1f,0.1f);
                     handleCollision(ac,bc);
                 }
@@ -122,18 +120,13 @@ public class TestDrive implements ResponseListener {
 
     }
     private void handleCollision(Coordinates ac, Coordinates bc){
-        mRobot.stop();
-        this.handeledCollision = true;
         for(Coordinates tmp : lastpositions)
             Log.i("TestDrive","x: " +tmp.x + " Y: " + tmp.y + "update: " + tmp.updated);
         Log.i("TestDrive","bc x: " +bc.x + " bc Y: " + bc.y + "bc update: " + bc.updated);
         Log.i("TestDrive","ac x: " +ac.x + " ac Y: " + ac.y + "ac update: " + ac.updated);
         Log.i("TestDrive","Heading:" + mRobot.getLastHeading());
         mRobot.setLed(0.1f,0f,0.1f);
-        float headback = 180+mRobot.getLastHeading();
-        mRobot.rotate(0.5f);
-        mRobot.drive(0,0.2f);
-        this.handeledCollision = false;
+        mRobot.rotate(0.9f);
 
     }
 }
