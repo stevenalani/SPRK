@@ -5,6 +5,7 @@ import android.util.Log;
 import com.orbotix.ConvenienceRobot;
 import com.orbotix.async.CollisionDetectedAsyncData;
 import com.orbotix.async.DeviceSensorAsyncMessage;
+import com.orbotix.async.GyroLimitsExceededAsyncData;
 import com.orbotix.command.RawMotorCommand;
 import com.orbotix.command.RollCommand;
 import com.orbotix.common.ResponseListener;
@@ -12,6 +13,8 @@ import com.orbotix.common.Robot;
 import com.orbotix.common.internal.AsyncMessage;
 import com.orbotix.common.internal.DeviceResponse;
 import com.orbotix.common.sensor.AccelerometerData;
+import com.orbotix.common.sensor.AttitudeData;
+import com.orbotix.common.sensor.AttitudeSensor;
 import com.orbotix.common.sensor.DeviceSensorsData;
 import com.orbotix.common.sensor.GyroData;
 import com.orbotix.common.sensor.LocatorData;
@@ -42,33 +45,38 @@ public class TestDrive implements ResponseListener {
     private List<Coordinates> lastpositions = new ArrayList<Coordinates>();
     private List<GyroData> lastgyrodata = new ArrayList<GyroData>();
     public TestDrive(ConvenienceRobot mRobot){
-        Log.i("TestDrive","TestDrive begins");
-        this.mRobot = mRobot;
-        long sensorFlag = SensorFlag.ACCELEROMETER_NORMALIZED.longValue() | SensorFlag.GYRO_NORMALIZED.longValue();
-        mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE20 );
-        mRobot.enableLocator(true);
-        mRobot.enableCollisions(true);
-        mRobot.addResponseListener(this);
-        int[] color = {204,255,51};
-        BlinkTimer bliker = new BlinkTimer(10,500,this.mRobot,color);
+        if(mRobot != null) {
+            Log.i("TestDrive", "TestDrive begins");
+            this.mRobot = mRobot;
+            long sensorFlag = SensorFlag.ACCELEROMETER_NORMALIZED.longValue() | SensorFlag.ATTITUDE.longValue();
+            mRobot.enableSensors(sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10);
+            mRobot.enableLocator(true);
+            mRobot.enableStabilization(true);
+            mRobot.enableCollisions(true);
+            mRobot.addResponseListener(this);
+            int[] color = {204, 255, 51};
+        /*for(int i = 1; i< 20 ; i++) {
+            BlinkTimer bliker = new BlinkTimer(i, 50, this.mRobot, color);
+        }*/
+        }
     }
     public void startTestDrive(){
         if(mRobot != null) {
             mRobot.setLed(0.1f, 0.1f, 0.1f);
-            mRobot.sendCommand(new RawMotorCommand(RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD, 125, RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD, 125));
+            mRobot.drive(0,0.5f);
         }
     }
 
     @Override
     public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
-        //Log.i("TestDrive", "Response " + deviceResponse.toString());
-        //Log.i("TestDrive", "Robot " + robot.getName());
+        Log.i("DeviceResponse", "Response " + deviceResponse.toString());
+        Log.i("DeviceResponse", "Robot " + robot.getName());
     }
 
     @Override
     public void handleStringResponse(String s, Robot robot) {
-        //Log.i("TestDrive", "sResponse " + s);
-        //Log.i("TestDrive", "Robot " + robot.getName());
+        Log.i("StringResponse", "sResponse " + s);
+        Log.i("StringResponse", "Robot " + robot.getName());
     }
 
     @Override
@@ -87,10 +95,15 @@ public class TestDrive implements ResponseListener {
                 Log.i("Locator","Fetched Coordinates:" + lastpositions.size() +"x: " +locatorData.getPositionX() + "\t Y: " + locatorData.getPositionY());
             }catch (Exception ex){Log.i("TestDrive", "no location data");}
             try {
+                //gyroData = dsd.getGyroData();
+
+                Log.i("gyroData Rotation","\tYaw "+dsd.getAttitudeData().yaw+"\tpitch "+dsd.getAttitudeData().pitch+"\troll "+dsd.getAttitudeData().roll);
                 GyroData gyroData = dsd.getGyroData();
                 this.lastgyrodata.add(gyroData);
                 Log.i("gyroData Rotation","\tRotatioinY "+gyroData.getRotationRateFiltered().y + "\tRotatioinX: " +gyroData.getRotationRateFiltered().x  + "\tRotatioinZ " +gyroData.getRotationRateFiltered().z);
-            }catch (Exception ex){Log.i("gyroData", "no gyro data");}
+            }catch (Exception ex){
+                //Log.i("gyroData", "no gyro data");
+            }
             try {
                 AccelerometerData accelerometerData =  dsd.getAccelerometerData();
             }catch (Exception ex){Log.i("accelerometerData", "no Acc data");}
@@ -109,7 +122,7 @@ public class TestDrive implements ResponseListener {
 
     }
     private void handleCollision(Coordinates ac, Coordinates bc){
-        mRobot.setRawMotors(RawMotorCommand.MotorMode.MOTOR_MODE_BRAKE,0, RawMotorCommand.MotorMode.MOTOR_MODE_BRAKE,0);
+        mRobot.stop();
         this.handeledCollision = true;
         for(Coordinates tmp : lastpositions)
             Log.i("TestDrive","x: " +tmp.x + " Y: " + tmp.y + "update: " + tmp.updated);
@@ -118,16 +131,9 @@ public class TestDrive implements ResponseListener {
         Log.i("TestDrive","Heading:" + mRobot.getLastHeading());
         mRobot.setLed(0.1f,0f,0.1f);
         float headback = 180+mRobot.getLastHeading();
-        mRobot.sendCommand(new RollCommand(headback,0.3f,RollCommand.State.GO));
-        mRobot.setLed(0.1f,0f,0.1f);
-        mRobot.sendCommand(new RollCommand(0,0.3f,RollCommand.State.GO));
-        mRobot.setLed(0.1f,0f,0.1f);
-        mRobot.sendCommand(new RollCommand(headback,0.1f,RollCommand.State.GO));
+        mRobot.rotate(0.5f);
+        mRobot.drive(0,0.2f);
         this.handeledCollision = false;
-    }
-    private static void Blinkit(int times, int delay){
-        for(int i = 0; i < times;i++){
 
-        }
     }
 }
