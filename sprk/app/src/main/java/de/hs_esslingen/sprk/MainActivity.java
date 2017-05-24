@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends AppCompatActivity implements DiscoveryAgentEventListener,View.OnClickListener,Observer,
+public class MainActivity extends AppCompatActivity implements DiscoveryAgentEventListener,View.OnClickListener,
     RobotChangedStateListener{
         DiscoveryAgentLE mDiscoveryAgent;
         ConvenienceRobot mRobot;
@@ -94,20 +94,18 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
                 break;
             case R.id.Testdrive:
                 testDrive = new TestDrive(mRobot);
-                break;
+                testDrive.startTestDrive();
+              break;
             case R.id.Disconnect:
-                mRobot.stop();
-                mRobot.disconnect();
-                mRobot = null;
+                if (mRobot != null) {
+                    mRobot.stop();
+                    mRobot.disconnect();
+                    mRobot = null;
+                }
                 break;
             case R.id.Connect:
                 startDiscovery();
                 break;
         }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-
     }
 }
