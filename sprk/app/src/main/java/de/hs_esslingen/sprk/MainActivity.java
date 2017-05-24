@@ -22,23 +22,21 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
     RobotChangedStateListener{
         DiscoveryAgentLE mDiscoveryAgent;
         ConvenienceRobot mRobot;
-        Button starter;
+        Button testdbtn,jumpbtn;
         TestDrive testDrive;
+        Jump jump;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        starter = (Button) findViewById(R.id.button);
-        starter.setOnClickListener(this);
-        starter.setEnabled(true);
-        startDiscovery();
-    }
+        testdbtn = (Button) findViewById(R.id.Testdrive);
+        testdbtn.setOnClickListener(this);
+        testdbtn.setEnabled(true);
+        jumpbtn = (Button) findViewById(R.id.Jump);
+        jumpbtn.setOnClickListener(this);
+        jumpbtn.setEnabled(true);
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mRobot.disconnect();
     }
 
     @Override
@@ -47,8 +45,10 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
         for (Robot robot : robots) {
             Log.i("Sphero", "  " + robot.getName());
             if(mRobot == null) {
-                if(!mDiscoveryAgent.getConnectedRobots().contains(robot))
+                if(!mDiscoveryAgent.getConnectedRobots().contains(robot)) {
                     mDiscoveryAgent.connect(robot);
+                    mDiscoveryAgent.stopDiscovery();
+                }
             }
         }
     }
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
             case Online:
                 Log.i("Sphero", "Robot " + robot.getName() + " Online!");
                 mRobot = new ConvenienceRobot(robot);
-                starter.setEnabled(true);
+                testdbtn.setEnabled(true);
             case Connecting:
                 Log.i("Sphero", "Robot " + robot.getName() + " Connecting!");
                 break;
@@ -90,13 +90,20 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Jump:
-                testDrive = new TestDrive(mRobot);
+                jump = new Jump(mRobot);
                 break;
             case R.id.Testdrive:
                 testDrive = new TestDrive(mRobot);
                 break;
+            case R.id.Disconnect:
+                mRobot.stop();
+                mRobot.disconnect();
+                mRobot = null;
+                break;
+            case R.id.Connect:
+                startDiscovery();
+                break;
         }
-        testDrive = new TestDrive(mRobot);
     }
 
     @Override
