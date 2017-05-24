@@ -89,7 +89,10 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button:
+            case R.id.Jump:
+                testDrive = new TestDrive(mRobot);
+                break;
+            case R.id.Testdrive:
                 testDrive = new TestDrive(mRobot);
                 break;
         }
