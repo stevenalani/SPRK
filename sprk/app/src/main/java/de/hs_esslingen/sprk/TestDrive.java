@@ -54,7 +54,6 @@ public class TestDrive implements ResponseListener {
         mRobot.enableLocator(true);
         mRobot.addResponseListener(this);
         mRobot.enableCollisions(true);
-        startTestDrive();
     }
     public void startTestDrive(){
         mRobot.setLed(0.1f,0.1f,0.1f);
