@@ -6,6 +6,7 @@ import com.orbotix.ConvenienceRobot;
 import com.orbotix.Sphero;
 import com.orbotix.async.CollisionDetectedAsyncData;
 import com.orbotix.async.DeviceSensorAsyncMessage;
+import com.orbotix.command.RawMotorCommand;
 import com.orbotix.command.RollCommand;
 import com.orbotix.common.ResponseListener;
 import com.orbotix.common.Robot;
@@ -25,22 +26,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
+import de.hs_esslingen.utils.Coordinates;
+
 /**
  * Created by Steven on 18.05.2017.
  */
 
-public class TestDrive extends Observable implements ResponseListener {
-    private class Coordinates{
-        public Timestamp updated;
-        public Coordinates(float x,float y) {
-            this.x = x;
-            this.y = y;
-            updated = new Timestamp(System.currentTimeMillis());
-            //Log.i("TestDrive",updated.toString());
-        }
-        public float x;
-        public float y;
-    }
+public class TestDrive implements ResponseListener {
 
 
     private ConvenienceRobot mRobot;
@@ -62,9 +54,13 @@ public class TestDrive extends Observable implements ResponseListener {
         mRobot.enableLocator(true);
         mRobot.addResponseListener(this);
         mRobot.enableCollisions(true);
-        mRobot.setLed(0.1f,0.1f,0.1f);
-        mRobot.sendCommand(new RollCommand(0, 0.3F, RollCommand.State.GO ));
+        startTestDrive();
     }
+    public void startTestDrive(){
+        mRobot.setLed(0.1f,0.1f,0.1f);
+        mRobot.sendCommand(new RawMotorCommand(RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD,125, RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD,125));
+    }
+
     @Override
     public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
         //Log.i("TestDrive", "Response " + deviceResponse.toString());
@@ -125,7 +121,7 @@ public class TestDrive extends Observable implements ResponseListener {
         float headback = 180+mRobot.getLastHeading();
         mRobot.sendCommand(new RollCommand(headback,0.3f,RollCommand.State.GO));
         mRobot.setLed(0.1f,0f,0.1f);
-        mRobot.sendCommand(new RollCommand(0,0.3f,RollCommand.State.STOP));
+        mRobot.sendCommand(new RollCommand(0,0.3f,RollCommand.State.GO));
         mRobot.setLed(0.1f,0f,0.1f);
         mRobot.sendCommand(new RollCommand(headback,0.1f,RollCommand.State.GO));
         this.handeledCollision = false;

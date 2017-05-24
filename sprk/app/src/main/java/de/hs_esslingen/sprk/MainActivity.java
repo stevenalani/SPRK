@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
                 break;
             case R.id.Testdrive:
                 testDrive = new TestDrive(mRobot);
-                break;
+              break;
             case R.id.Disconnect:
                 mRobot.stop();
                 mRobot.disconnect();
