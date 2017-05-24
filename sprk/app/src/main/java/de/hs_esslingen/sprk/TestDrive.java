@@ -3,7 +3,6 @@ package de.hs_esslingen.sprk;
 import android.util.Log;
 
 import com.orbotix.ConvenienceRobot;
-import com.orbotix.Sphero;
 import com.orbotix.async.CollisionDetectedAsyncData;
 import com.orbotix.async.DeviceSensorAsyncMessage;
 import com.orbotix.command.RawMotorCommand;
@@ -19,13 +18,10 @@ import com.orbotix.common.sensor.LocatorData;
 import com.orbotix.common.sensor.SensorFlag;
 import com.orbotix.subsystem.SensorControl;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 
+import de.hs_esslingen.utils.BlinkTimer;
 import de.hs_esslingen.utils.Coordinates;
 
 /**
@@ -33,8 +29,6 @@ import de.hs_esslingen.utils.Coordinates;
  */
 
 public class TestDrive implements ResponseListener {
-
-
     private ConvenienceRobot mRobot;
     private boolean handeledCollision = false;
     /**
@@ -45,19 +39,24 @@ public class TestDrive implements ResponseListener {
                 currentSpeed,
                 lastHeadingBC,
                 lastSpeed;
-    private List<Coordinates> lastTenPoss = new ArrayList<Coordinates>();
+    private List<Coordinates> lastpositions = new ArrayList<Coordinates>();
+    private List<GyroData> lastgyrodata = new ArrayList<GyroData>();
     public TestDrive(ConvenienceRobot mRobot){
         Log.i("TestDrive","TestDrive begins");
         this.mRobot = mRobot;
         long sensorFlag = SensorFlag.ACCELEROMETER_NORMALIZED.longValue() | SensorFlag.GYRO_NORMALIZED.longValue();
-        mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10 );
+        mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE20 );
         mRobot.enableLocator(true);
-        mRobot.addResponseListener(this);
         mRobot.enableCollisions(true);
+        mRobot.addResponseListener(this);
+        int[] color = {204,255,51};
+        BlinkTimer bliker = new BlinkTimer(10,500,this.mRobot,color);
     }
     public void startTestDrive(){
-        mRobot.setLed(0.1f,0.1f,0.1f);
-        mRobot.sendCommand(new RawMotorCommand(RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD,125, RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD,125));
+        if(mRobot != null) {
+            mRobot.setLed(0.1f, 0.1f, 0.1f);
+            mRobot.sendCommand(new RawMotorCommand(RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD, 125, RawMotorCommand.MotorMode.MOTOR_MODE_FORWARD, 125));
+        }
     }
 
     @Override
@@ -82,14 +81,15 @@ public class TestDrive implements ResponseListener {
             DeviceSensorsData dsd = sensorDataArray.get(sensorDataArray.size() - 1);
             try {
                 LocatorData locatorData = dsd.getLocatorData();
-                //if (lastTenPoss.size() == 10 )
-                   // this.lastTenPoss.remove(0);
-                this.lastTenPoss.add(new Coordinates(locatorData.getPositionX(),locatorData.getPositionY()));
-                Log.i("Locator","Fetched Coordinates:" + lastTenPoss.size() +"x: " +locatorData.getPositionX() + "\t Y: " + locatorData.getPositionY());
+                //if (lastpositions.size() == 10 )
+                   // this.lastpositions.remove(0);
+                this.lastpositions.add(new Coordinates(locatorData.getPositionX(),locatorData.getPositionY()));
+                Log.i("Locator","Fetched Coordinates:" + lastpositions.size() +"x: " +locatorData.getPositionX() + "\t Y: " + locatorData.getPositionY());
             }catch (Exception ex){Log.i("TestDrive", "no location data");}
             try {
                 GyroData gyroData = dsd.getGyroData();
-                Log.i("gyroData",gyroData.getRotationRateFiltered().y + "");
+                this.lastgyrodata.add(gyroData);
+                Log.i("gyroData Rotation","\tRotatioinY "+gyroData.getRotationRateFiltered().y + "\tRotatioinX: " +gyroData.getRotationRateFiltered().x  + "\tRotatioinZ " +gyroData.getRotationRateFiltered().z);
             }catch (Exception ex){Log.i("gyroData", "no gyro data");}
             try {
                 AccelerometerData accelerometerData =  dsd.getAccelerometerData();
@@ -98,9 +98,9 @@ public class TestDrive implements ResponseListener {
 
         if (asyncMessage instanceof CollisionDetectedAsyncData) {
             if(this.mRobot.getRobot() == robot){
-                if(!handeledCollision) {
-                    Coordinates ac = lastTenPoss.get(lastTenPoss.size() - 1);
-                    Coordinates bc = lastTenPoss.get(lastTenPoss.size() - 3);
+                if(!handeledCollision) {                    Coordinates ac = lastpositions.get(lastpositions.size() - 1);
+                    Coordinates bc = lastpositions.get(lastpositions.size() - 3);
+                    GyroData lastgd = lastgyrodata.get(lastgyrodata.size()-1);
                     mRobot.setLed(1f,0.1f,0.1f);
                     handleCollision(ac,bc);
                 }
@@ -109,9 +109,9 @@ public class TestDrive implements ResponseListener {
 
     }
     private void handleCollision(Coordinates ac, Coordinates bc){
-        mRobot.stop();
+        mRobot.setRawMotors(RawMotorCommand.MotorMode.MOTOR_MODE_BRAKE,0, RawMotorCommand.MotorMode.MOTOR_MODE_BRAKE,0);
         this.handeledCollision = true;
-        for(Coordinates tmp : lastTenPoss)
+        for(Coordinates tmp : lastpositions)
             Log.i("TestDrive","x: " +tmp.x + " Y: " + tmp.y + "update: " + tmp.updated);
         Log.i("TestDrive","bc x: " +bc.x + " bc Y: " + bc.y + "bc update: " + bc.updated);
         Log.i("TestDrive","ac x: " +ac.x + " ac Y: " + ac.y + "ac update: " + ac.updated);
@@ -124,5 +124,10 @@ public class TestDrive implements ResponseListener {
         mRobot.setLed(0.1f,0f,0.1f);
         mRobot.sendCommand(new RollCommand(headback,0.1f,RollCommand.State.GO));
         this.handeledCollision = false;
+    }
+    private static void Blinkit(int times, int delay){
+        for(int i = 0; i < times;i++){
+
+        }
     }
 }
