@@ -23,12 +23,13 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
 /**
  * Created by Steven on 18.05.2017.
  */
 
-public class TestDrive implements ResponseListener {
+public class TestDrive extends Observable implements ResponseListener {
     private class Coordinates{
         public Timestamp updated;
         public Coordinates(float x,float y) {
@@ -62,7 +63,7 @@ public class TestDrive implements ResponseListener {
         mRobot.addResponseListener(this);
         mRobot.enableCollisions(true);
         mRobot.setLed(0.1f,0.1f,0.1f);
-        mRobot.sendCommand(new RollCommand(0, 0.5F, RollCommand.State.GO ));
+        mRobot.sendCommand(new RollCommand(0, 0.3F, RollCommand.State.GO ));
     }
     @Override
     public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
@@ -121,9 +122,12 @@ public class TestDrive implements ResponseListener {
         Log.i("TestDrive","ac x: " +ac.x + " ac Y: " + ac.y + "ac update: " + ac.updated);
         Log.i("TestDrive","Heading:" + mRobot.getLastHeading());
         mRobot.setLed(0.1f,0f,0.1f);
-        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.3f,RollCommand.State.GO));
-        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.3f,RollCommand.State.STOP));
-        mRobot.sendCommand(new RollCommand(180+mRobot.getLastHeading(),0.1f,RollCommand.State.GO));
+        float headback = 180+mRobot.getLastHeading();
+        mRobot.sendCommand(new RollCommand(headback,0.3f,RollCommand.State.GO));
+        mRobot.setLed(0.1f,0f,0.1f);
+        mRobot.sendCommand(new RollCommand(0,0.3f,RollCommand.State.STOP));
+        mRobot.setLed(0.1f,0f,0.1f);
+        mRobot.sendCommand(new RollCommand(headback,0.1f,RollCommand.State.GO));
         this.handeledCollision = false;
     }
 }
