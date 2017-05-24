@@ -38,11 +38,32 @@
         app:layout_constraintVertical_bias="0.045" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/Connect"
         android:layout_width="368dp"
         android:layout_height="58dp"
-        android:text="Button"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="450dp" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClick"
+        android:text="connect SPRK+"
+        app:layout_constraintBottom_toTopOf="@+id/Disconnect"
+        app:layout_constraintVertical_bias="0.862"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="@+id/Disconnect"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/Disconnect" />
+
+    <Button
+        android:id="@+id/Disconnect"
+        android:layout_width="368dp"
+        android:layout_height="58dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClick"
+        android:text="Disconnect SPRK+"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Jump"
+        app:layout_constraintVertical_bias="0.94"
+        tools:layout_editor_absoluteX="8dp" />
 
 </android.support.constraint.ConstraintLayout>
