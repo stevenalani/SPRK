@@ -14,7 +14,8 @@
         android:layout_height="162dp"
 
         android:layout_marginLeft="8dp"
-        android:text="Testdrive"
+        android:onClick="onClick"
+        android:text="Jump"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.923"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -23,7 +24,7 @@
         app:layout_constraintVertical_bias="0.045" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/Testdrive"
         android:layout_width="168dp"
         android:layout_height="162dp"
 
