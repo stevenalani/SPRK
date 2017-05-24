@@ -15,8 +15,10 @@ import com.orbotix.le.DiscoveryAgentLE;
 import com.orbotix.le.RobotRadioDescriptor;
 
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
-public class MainActivity extends AppCompatActivity implements DiscoveryAgentEventListener,View.OnClickListener,
+public class MainActivity extends AppCompatActivity implements DiscoveryAgentEventListener,View.OnClickListener,Observer,
     RobotChangedStateListener{
         DiscoveryAgentLE mDiscoveryAgent;
         ConvenienceRobot mRobot;
@@ -87,10 +89,18 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button:
+            case R.id.Jump:
+                testDrive = new TestDrive(mRobot);
+                break;
+            case R.id.Testdrive:
                 testDrive = new TestDrive(mRobot);
                 break;
         }
         testDrive = new TestDrive(mRobot);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+
     }
 }
