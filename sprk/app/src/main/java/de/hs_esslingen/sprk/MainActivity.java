@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
 
                 //Enable sensors based on the flag defined above, and stream their data ten times a second to the mobile device
                 mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10 );
-                mRobot.enableLocator(true);
+                //mRobot.enableLocator(true);
 
                 testdbtn.setEnabled(true);
             case Connecting:
