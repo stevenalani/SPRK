@@ -50,14 +50,14 @@ public class TestDrive implements ResponseListener {
      * Helpers to drive back to old positon before collosion
      * Currently unused
      */
-    private List<Coordinates> lastPositionsList = new ArrayList<Coordinates>();
-    private List<Coordinates> sinceCollusions = new ArrayList<>();
-    private List<GyroData> lastGyroData = new ArrayList<GyroData>();
-    private List<AccelerometerData> lastAccelData = new ArrayList<AccelerometerData>();
-    private List<BackEMFData> lastEMFData = new ArrayList<BackEMFData>();
-    private List<QuaternionSensor> lastQuaternions = new ArrayList<QuaternionSensor>();
-    private List<AttitudeSensor> lastAttitudes = new ArrayList<AttitudeSensor>();
-    private int MAX_LIST_SIZE = 20;
+    protected List<Coordinates> lastPositionsList = new ArrayList<Coordinates>();
+    protected List<Coordinates> sinceCollusions = new ArrayList<>();
+    protected List<GyroData> lastGyroData = new ArrayList<GyroData>();
+    protected List<AccelerometerData> lastAccelData = new ArrayList<AccelerometerData>();
+    protected List<BackEMFData> lastEMFData = new ArrayList<BackEMFData>();
+    protected List<QuaternionSensor> lastQuaternions = new ArrayList<QuaternionSensor>();
+    protected List<AttitudeSensor> lastAttitudes = new ArrayList<AttitudeSensor>();
+    protected int MAX_LIST_SIZE = 20;
 
     public TestDrive(ConvenienceRobot mRobot){
         if(mRobot != null) {
@@ -73,6 +73,7 @@ public class TestDrive implements ResponseListener {
             mRobot.setLed(204/255f, 255/255f, 51/255f);
             mRobot.enableCollisions(true);
             mRobot.enableStabilization(false);
+
             mRobot.drive(0f,ROBOT_SPEED);
         }
     }
@@ -120,12 +121,14 @@ public class TestDrive implements ResponseListener {
 
             //Extract gyroscope data from the sensor data
             this.updateLastGyroData(data.getGyroData());
-            //Log.i("DeviceSensorsData gyroscope: ",String.valueOf(data.getGyroData()));
+            Log.i("DeviceSensorsData gyroscope: ",String.valueOf(data.getGyroData()));
             this.updateLastPoslist(message.getAsyncData().get(0).getLocatorData());
         }
         if (asyncMessage instanceof CollisionDetectedAsyncData) {
+
             if(this.mRobot.getRobot() == robot){
                 if(!handeledCollision) {
+                    mRobot.enableLocator(true);
                     Coordinates ac = lastPositionsList.get(lastPositionsList.size() - 1);
                     Coordinates bc = lastPositionsList.get(lastPositionsList.size() - 3);
                     mRobot.setLed(1f,0.1f,0.1f);
@@ -138,7 +141,7 @@ public class TestDrive implements ResponseListener {
         handeledCollision = true;
         Log.i("handlecollisionimpPwr","\nImpactPower X: "+data.getImpactPower().x +"\tY: "+data.getImpactPower().y);
         Log.i("handlecollisionimpAcc","\nImpactAcceleration X: "+data.getImpactAcceleration().x +"\tY: "+data.getImpactAcceleration().y+"\tZ: "+data.getImpactAcceleration().z);
-        Log.i("handlecollisionimpVel","\nImpactSpeedX: "+data.getImpactSpeed());
+        Log.i("handlecollisionimpVel","\nImpactSpeed: "+data.getImpactSpeed());
         mRobot.stop();
         for(Coordinates tmp : lastPositionsList)
             //Log.i("handlecollision","x: " +tmp.x + " Y: " + tmp.y + "update: " + tmp.updated);
@@ -154,6 +157,7 @@ public class TestDrive implements ResponseListener {
             @Override
             public void run() {
                 TestDrive.handeledCollision = false;
+                mRobot.enableLocator(false);
             }
         },COLLISION_TIMEOUT);
     }

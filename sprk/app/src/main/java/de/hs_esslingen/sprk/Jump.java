@@ -13,4 +13,7 @@ public class Jump extends TestDrive {
     public Jump(ConvenienceRobot mRobot) {
         super(mRobot);
     }
+    public  void gyro(){
+
+    }
 }
