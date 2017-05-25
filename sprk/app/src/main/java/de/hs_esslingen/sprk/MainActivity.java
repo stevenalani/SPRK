@@ -11,8 +11,10 @@ import com.orbotix.common.DiscoveryAgentEventListener;
 import com.orbotix.common.DiscoveryException;
 import com.orbotix.common.Robot;
 import com.orbotix.common.RobotChangedStateListener;
+import com.orbotix.common.sensor.SensorFlag;
 import com.orbotix.le.DiscoveryAgentLE;
 import com.orbotix.le.RobotRadioDescriptor;
+import com.orbotix.subsystem.SensorControl;
 
 import java.util.List;
 import java.util.Observable;
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
         setContentView(R.layout.activity_main);
         testdbtn = (Button) findViewById(R.id.Testdrive);
         testdbtn.setOnClickListener(this);
-        testdbtn.setEnabled(true);
+        testdbtn.setEnabled(false);
         jumpbtn = (Button) findViewById(R.id.Jump);
         jumpbtn.setOnClickListener(this);
         jumpbtn.setEnabled(true);
@@ -59,6 +61,20 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
             case Online:
                 Log.i("Sphero", "Robot " + robot.getName() + " Online!");
                 mRobot = new ConvenienceRobot(robot);
+                long sensorFlag = SensorFlag.QUATERNION.longValue()
+                        | SensorFlag.ACCELEROMETER_NORMALIZED.longValue()
+                        | SensorFlag.GYRO_NORMALIZED.longValue()
+                        | SensorFlag.MOTOR_BACKEMF_NORMALIZED.longValue()
+                        | SensorFlag.ATTITUDE.longValue();
+
+                //Save the robot as a ConvenienceRobot for additional utility methods
+                mRobot = new ConvenienceRobot( robot );
+
+
+                //Enable sensors based on the flag defined above, and stream their data ten times a second to the mobile device
+                mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10 );
+                mRobot.enableLocator(true);
+
                 testdbtn.setEnabled(true);
             case Connecting:
                 Log.i("Sphero", "Robot " + robot.getName() + " Connecting!");
