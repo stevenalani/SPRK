@@ -16,4 +16,13 @@ public class Coordinates{
     }
     public float x;
     public float y;
+
+    @Override
+    public String toString() {
+        return "Coordinates{" +
+                "updated=" + updated +
+                ", x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }
