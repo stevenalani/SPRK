@@ -10,8 +10,8 @@ import de.hs_esslingen.sprk.TestDrive;
 
 public class Jump extends TestDrive {
 
-    public Jump(ConvenienceRobot mRobot) {
-        super(mRobot);
+    public Jump(ConvenienceRobot mRobot,float dSpeed) {
+        super(mRobot,dSpeed);
     }
     public  void gyro(){
 

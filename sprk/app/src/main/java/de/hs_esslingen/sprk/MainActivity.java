@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.orbotix.ConvenienceRobot;
 import com.orbotix.common.DiscoveryAgentEventListener;
@@ -20,6 +21,7 @@ import com.orbotix.subsystem.SensorControl;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity implements
         DiscoveryAgentEventListener,
@@ -30,8 +32,10 @@ public class MainActivity extends AppCompatActivity implements
         ConvenienceRobot mRobot;
         Button testdbtn,jumpbtn;
         SeekBar seekBar;
+        TextView speedLabel;
         TestDrive testDrive;
         Jump jump;
+        float driveSpeed = 0.5f;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         seekBar = (SeekBar) findViewById(R.id.speedbar);
         seekBar.setOnSeekBarChangeListener(this);
+        speedLabel = (TextView)findViewById(R.id.labSpeed);
+        speedLabel.setText(String.valueOf(driveSpeed));
         testdbtn = (Button) findViewById(R.id.Testdrive);
         testdbtn.setOnClickListener(this);
         testdbtn.setEnabled(false);
@@ -110,10 +116,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Jump:
-                jump = new Jump(mRobot);
+                jump = new Jump(mRobot,driveSpeed);
                 break;
             case R.id.Testdrive:
-                testDrive = new TestDrive(mRobot);
+                testDrive = new TestDrive(mRobot,driveSpeed);
                 testDrive.startTestDrive();
               break;
             case R.id.Disconnect:
@@ -138,7 +144,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+        driveSpeed = seekBar.getProgress()/100f;
+        speedLabel.setText(String.valueOf(driveSpeed));
     }
 
     @Override
@@ -148,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        float newSpeed = seekBar.getProgress()/100f;
+        driveSpeed = seekBar.getProgress()/100f;
+        testDrive.setROBOT_SPEED(driveSpeed);
+
+        Log.i("Set Speed",driveSpeed+"");
     }
 }

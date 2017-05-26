@@ -36,17 +36,17 @@ public class TestDrive implements ResponseListener {
     public static boolean handeledCollision = false;
     private long COLLISION_TIMEOUT = 1000;
 
-    public void setROBOT_SPEED(float ROBOT_SPEED) {
-        this.ROBOT_SPEED = ROBOT_SPEED;
+    public static void setROBOT_SPEED(float ROBOT_SPEED) {
+        TestDrive.ROBOT_SPEED = ROBOT_SPEED;
     }
 
-    private float ROBOT_SPEED = 0.5f;
+    protected static float ROBOT_SPEED = 0.5f;
 
-    public void setROBOT_SCAN_SPEED(float ROBOT_SCAN_SPEED) {
-        this.ROBOT_SCAN_SPEED = ROBOT_SCAN_SPEED;
+    public static void setROBOT_SCAN_SPEED(float ROBOT_SCAN_SPEED) {
+        TestDrive.ROBOT_SCAN_SPEED = ROBOT_SCAN_SPEED;
     }
 
-    private float ROBOT_SCAN_SPEED = 0.25f;
+    private static float ROBOT_SCAN_SPEED = 0.25f;
     /**
      * Helpers to drive back to old positon before collosion
      * Currently unused
@@ -61,7 +61,7 @@ public class TestDrive implements ResponseListener {
     protected int MAX_LIST_SIZE = 20;
     protected int[] color = {204, 255, 51};
 
-    public TestDrive(ConvenienceRobot mRobot){
+    public TestDrive(ConvenienceRobot mRobot,float driveSpeed){
         if(mRobot != null) {
             Log.i("TestDrive", "TestDrive begins");
             this.mRobot = mRobot;
@@ -76,6 +76,7 @@ public class TestDrive implements ResponseListener {
 
             mRobot.setLed(204/255f, 255/255f, 51/255f);
             mRobot.drive(0f,ROBOT_SPEED);
+            Log.i("start",ROBOT_SPEED+"");
         }
     }
 
@@ -138,11 +139,8 @@ public class TestDrive implements ResponseListener {
     private void handleCollision(CollisionDetectedAsyncData data){
         handeledCollision = true;
         mRobot.setLed(1f,0f,0f);
-        mRobot.stop();
-
-        mRobot.rotate(90f);
+        mRobot.drive(90f,ROBOT_SCAN_SPEED);
         mRobot.setZeroHeading();
-        mRobot.drive(0f,ROBOT_SCAN_SPEED);
         Timer resetHandleCollision = new Timer();
         resetHandleCollision.schedule(new TimerTask() {
             @Override
