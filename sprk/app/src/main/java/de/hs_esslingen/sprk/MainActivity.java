@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 
 import com.orbotix.ConvenienceRobot;
 import com.orbotix.common.DiscoveryAgentEventListener;
@@ -20,11 +21,15 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends AppCompatActivity implements DiscoveryAgentEventListener,View.OnClickListener,
-    RobotChangedStateListener{
+public class MainActivity extends AppCompatActivity implements
+        DiscoveryAgentEventListener,
+        View.OnClickListener,
+        SeekBar.OnSeekBarChangeListener,
+        RobotChangedStateListener{
         DiscoveryAgentLE mDiscoveryAgent;
         ConvenienceRobot mRobot;
         Button testdbtn,jumpbtn;
+        SeekBar seekBar;
         TestDrive testDrive;
         Jump jump;
     @Override
@@ -32,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        seekBar = (SeekBar) findViewById(R.id.speedbar);
+        seekBar.setOnSeekBarChangeListener(this);
         testdbtn = (Button) findViewById(R.id.Testdrive);
         testdbtn.setOnClickListener(this);
         testdbtn.setEnabled(false);
@@ -65,16 +72,13 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
                         | SensorFlag.ACCELEROMETER_NORMALIZED.longValue()
                         | SensorFlag.GYRO_NORMALIZED.longValue()
                         | SensorFlag.MOTOR_BACKEMF_NORMALIZED.longValue()
-                        | SensorFlag.ATTITUDE.longValue();
+                        | SensorFlag.ATTITUDE.longValue()
+                        | SensorFlag.LOCATOR.longValue();
 
                 //Save the robot as a ConvenienceRobot for additional utility methods
                 mRobot = new ConvenienceRobot( robot );
-
-
                 //Enable sensors based on the flag defined above, and stream their data ten times a second to the mobile device
                 mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10 );
-                //mRobot.enableLocator(true);
-
                 testdbtn.setEnabled(true);
             case Connecting:
                 Log.i("Sphero", "Robot " + robot.getName() + " Connecting!");
@@ -123,5 +127,27 @@ public class MainActivity extends AppCompatActivity implements DiscoveryAgentEve
                 startDiscovery();
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRobot.setLed(125,125,125);
+        mRobot.disconnect();
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        float newSpeed = seekBar.getProgress()/100f;
     }
 }
